@@ -722,16 +722,12 @@
     });
 
     function setPlaying(btn, playing) {
-      const icon = btn.querySelector('.play-icon');
+      const color = btn.classList.contains('play-btn--white') ? '#3c0834' : '#ffffff';
       if (playing) {
-        icon.style.borderWidth = '0';
-        icon.style.width = '10px';
-        icon.style.height = '12px';
-        icon.style.background = btn.classList.contains('play-btn--white') ? '#3c0834' : '#ffffff';
-        icon.style.borderStyle = 'none';
-        icon.style.boxShadow = 'inset 3px 0 0 4px currentColor';
+        btn.innerHTML = `<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="0" y="0" width="4" height="14" rx="1" fill="${color}"/><rect x="8" y="0" width="4" height="14" rx="1" fill="${color}"/></svg>`;
       } else {
-        icon.style.cssText = '';
+        const isWhite = btn.classList.contains('play-btn--white');
+        btn.innerHTML = `<span class="play-icon ${isWhite ? 'play-icon--dark' : 'play-icon--white'}"></span>`;
       }
     }
   </script>
