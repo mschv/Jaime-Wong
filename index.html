@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
+    html { scroll-behavior: smooth; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -28,9 +29,12 @@
     /* ── NAVIGATION ── */
     .nav {
       position: absolute;
-      top: 40px;
-      right: var(--pad);
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 28px var(--pad);
       display: flex;
+      justify-content: flex-end;
       gap: clamp(16px, 2vw, 32px);
       font-size: clamp(16px, 1.5vw, 24px);
       font-weight: 500;
@@ -213,14 +217,22 @@
     .songs-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 4px;
     }
     .song-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin: 0 -8px;
+      transition: background 0.15s;
     }
+    .song-row:hover { background: rgba(255,255,255,0.08); }
+    .song-row.is-playing { background: rgba(255,255,255,0.12); }
+    .song-row.is-playing .song-title { color: #ffb3d9; }
     .song-row__left {
       display: flex;
       align-items: center;
@@ -320,8 +332,105 @@
     }
     .footer-logo { width: 69px; height: 71px; object-fit: cover; }
 
+    /* ── LOADING SPINNER ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .play-btn.loading { pointer-events: none; }
+    .play-btn.loading::after {
+      content: '';
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      animation: spin 0.7s linear infinite;
+      display: block;
+    }
+    .play-btn--white.loading::after {
+      border-color: rgba(60,8,52,0.25);
+      border-top-color: #3c0834;
+    }
+    .play-btn.loading .play-icon,
+    .play-btn.loading svg { display: none; }
+
+    /* ── MINI PLAYER ── */
+    .mini-player {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(20, 2, 17, 0.96);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding: 10px var(--pad);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 200;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mini-player.visible { transform: translateY(0); }
+    .mini-thumb {
+      width: 44px; height: 44px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .mini-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .mini-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-artist { font-size: 12px; color: var(--muted); }
+    .mini-play-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .mini-play-btn:hover { transform: scale(1.08); }
+    .mini-progress-wrap {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-progress-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+    .mini-progress-bar:hover { height: 6px; }
+    .mini-progress-fill {
+      height: 100%;
+      background: var(--white);
+      border-radius: 2px;
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.4s linear;
+    }
+    .mini-time { font-size: 12px; color: var(--muted); white-space: nowrap; min-width: 36px; text-align: right; }
+
     /* ── RESPONSIVE ── */
+    body.player-active { padding-bottom: 68px; }
+
     @media (max-width: 640px) {
+      .mini-progress-wrap { display: none; }
       .hero__bg { content: url('hero-mobile.jpeg'); }
       .hero__copy {
         max-width: 80%;
@@ -677,7 +786,7 @@
     </div>
     <div class="footer-bottom">
       <p class="footer-copy">
-        © 2025 Jaime Wong Entertainment LLC. All rights reserved. Especially the boa.<br>
+        © 2026 Jaime Wong Entertainment LLC. All rights reserved. Especially the boa.<br>
         Built with ❤️ by Marisu &amp; Nico
       </p>
       <img class="footer-logo"
@@ -686,49 +795,197 @@
     </div>
   </footer>
 
+  <!-- ── MINI PLAYER ── -->
+  <div class="mini-player" id="miniPlayer">
+    <img class="mini-thumb" id="miniThumb" src="" alt="">
+    <div class="mini-info">
+      <span class="mini-title" id="miniTitle">—</span>
+      <span class="mini-artist">Jaime Wong</span>
+    </div>
+    <button class="mini-play-btn" id="miniPlayBtn" aria-label="Play/Pause">
+      <span class="play-icon play-icon--dark"></span>
+    </button>
+    <div class="mini-progress-wrap">
+      <div class="mini-progress-bar" id="miniProgressBar">
+        <div class="mini-progress-fill" id="miniProgressFill"></div>
+      </div>
+      <span class="mini-time" id="miniTime">0:00</span>
+    </div>
+  </div>
+
   <script>
     let currentAudio = null;
-    let currentBtn = null;
+    let currentSrc   = null;
+    let isPlaying    = false;
+    let progressInterval = null;
 
+    const miniPlayer       = document.getElementById('miniPlayer');
+    const miniThumb        = document.getElementById('miniThumb');
+    const miniTitle        = document.getElementById('miniTitle');
+    const miniPlayBtn      = document.getElementById('miniPlayBtn');
+    const miniProgressBar  = document.getElementById('miniProgressBar');
+    const miniProgressFill = document.getElementById('miniProgressFill');
+    const miniTime         = document.getElementById('miniTime');
+
+    // ── Make whole song row clickable ──
+    document.querySelectorAll('.song-row').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.closest('.play-btn')) return;
+        const btn = row.querySelector('.play-btn[data-audio]');
+        if (btn) btn.dispatchEvent(new MouseEvent('click', { bubbles: false }));
+      });
+    });
+
+    // ── Play buttons ──
     document.querySelectorAll('.play-btn[data-audio]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
         const src = btn.dataset.audio;
 
-        // If same button, toggle pause/play
-        if (currentBtn === btn) {
-          if (currentAudio.paused) {
-            currentAudio.play();
-            setPlaying(btn, true);
-          } else {
+        // Same audio source — toggle play/pause
+        if (currentAudio && src === currentSrc) {
+          if (isPlaying) {
             currentAudio.pause();
-            setPlaying(btn, false);
+            isPlaying = false;
+            setAllBtnsForSrc(src, false);
+            setMiniPlayState(false);
+            stopProgress();
+          } else {
+            currentAudio.play().catch(() => {});
+            isPlaying = true;
+            setAllBtnsForSrc(src, true);
+            setMiniPlayState(true);
+            startProgress();
           }
           return;
         }
 
-        // Stop previous
+        // Stop previous audio
         if (currentAudio) {
           currentAudio.pause();
-          setPlaying(currentBtn, false);
+          setAllBtnsForSrc(currentSrc, false);
+          clearRowPlaying();
+          stopProgress();
         }
+        isPlaying = false;
 
+        // Start loading new audio
+        btn.classList.add('loading');
+        currentSrc   = src;
         currentAudio = new Audio(src);
-        currentBtn = btn;
-        currentAudio.play();
-        setPlaying(btn, true);
 
-        currentAudio.addEventListener('ended', () => setPlaying(btn, false));
+        currentAudio.addEventListener('canplay', () => {
+          btn.classList.remove('loading');
+          currentAudio.play().catch(() => {});
+          isPlaying = true;
+          setAllBtnsForSrc(src, true);
+
+          // Find the song-row for this audio (if any)
+          const row = findRowForSrc(src);
+          let title    = 'Jaime Wong';
+          let thumbSrc = '';
+          if (row) {
+            row.classList.add('is-playing');
+            title    = row.querySelector('.song-title').textContent.trim();
+            thumbSrc = row.querySelector('.song-thumb')?.src || '';
+          } else {
+            const card = btn.closest('.album-card');
+            title    = card?.querySelector('.album-name')?.textContent || 'Jaime Wong';
+            thumbSrc = card?.querySelector('.album-cover')?.src || '';
+          }
+          showMiniPlayer(title, thumbSrc);
+          startProgress();
+        }, { once: true });
+
+        currentAudio.addEventListener('ended', () => {
+          isPlaying = false;
+          setAllBtnsForSrc(src, false);
+          clearRowPlaying();
+          setMiniPlayState(false);
+          stopProgress();
+          miniProgressFill.style.width = '0%';
+          miniTime.textContent = '0:00';
+        });
       });
     });
 
-    function setPlaying(btn, playing) {
-      const color = btn.classList.contains('play-btn--white') ? '#3c0834' : '#ffffff';
-      if (playing) {
-        btn.innerHTML = `<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="0" y="0" width="4" height="14" rx="1" fill="${color}"/><rect x="8" y="0" width="4" height="14" rx="1" fill="${color}"/></svg>`;
+    // ── Mini player controls ──
+    miniPlayBtn.addEventListener('click', () => {
+      if (!currentAudio) return;
+      if (isPlaying) {
+        currentAudio.pause();
+        isPlaying = false;
+        setAllBtnsForSrc(currentSrc, false);
+        setMiniPlayState(false);
+        stopProgress();
       } else {
-        const isWhite = btn.classList.contains('play-btn--white');
-        btn.innerHTML = `<span class="play-icon ${isWhite ? 'play-icon--dark' : 'play-icon--white'}"></span>`;
+        currentAudio.play().catch(() => {});
+        isPlaying = true;
+        setAllBtnsForSrc(currentSrc, true);
+        setMiniPlayState(true);
+        startProgress();
       }
+    });
+
+    miniProgressBar.addEventListener('click', e => {
+      if (!currentAudio || !currentAudio.duration) return;
+      const rect = miniProgressBar.getBoundingClientRect();
+      currentAudio.currentTime = ((e.clientX - rect.left) / rect.width) * currentAudio.duration;
+      updateProgress();
+    });
+
+    // ── Helpers ──
+    function setAllBtnsForSrc(src, playing) {
+      document.querySelectorAll('.play-btn[data-audio="' + src + '"]').forEach(b => setPlaying(b, playing));
+    }
+
+    function findRowForSrc(src) {
+      const b = document.querySelector('.song-row .play-btn[data-audio="' + src + '"]');
+      return b ? b.closest('.song-row') : null;
+    }
+
+    function clearRowPlaying() {
+      document.querySelectorAll('.song-row.is-playing').forEach(r => r.classList.remove('is-playing'));
+    }
+
+    function showMiniPlayer(title, thumbSrc) {
+      miniTitle.textContent = title;
+      miniThumb.src = thumbSrc;
+      miniPlayer.classList.add('visible');
+      document.body.classList.add('player-active');
+      setMiniPlayState(true);
+    }
+
+    function setMiniPlayState(playing) {
+      miniPlayBtn.innerHTML = playing
+        ? '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="0" y="0" width="4" height="14" rx="1" fill="#3c0834"/><rect x="8" y="0" width="4" height="14" rx="1" fill="#3c0834"/></svg>'
+        : '<span class="play-icon play-icon--dark"></span>';
+    }
+
+    function startProgress() {
+      stopProgress();
+      progressInterval = setInterval(updateProgress, 500);
+    }
+    function stopProgress() { clearInterval(progressInterval); }
+
+    function updateProgress() {
+      if (!currentAudio || !currentAudio.duration) return;
+      const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
+      miniProgressFill.style.width = pct + '%';
+      miniTime.textContent = formatTime(currentAudio.currentTime);
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    }
+
+    function setPlaying(btn, playing) {
+      const isWhite = btn.classList.contains('play-btn--white');
+      const color   = isWhite ? '#3c0834' : '#ffffff';
+      btn.innerHTML = playing
+        ? '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="0" y="0" width="4" height="14" rx="1" fill="' + color + '"/><rect x="8" y="0" width="4" height="14" rx="1" fill="' + color + '"/></svg>'
+        : '<span class="play-icon ' + (isWhite ? 'play-icon--dark' : 'play-icon--white') + '"></span>';
     }
   </script>
 </body>
