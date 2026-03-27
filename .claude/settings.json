@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(open /Users/marisuchang/jaime-wong-site/index.html)",
+      "Bash(mv \"JIWP BAJO LA LLUVIA.ogg\" \"jiwp-bajo-la-lluvia.ogg\")",
+      "Bash(mv \"JIWP FUMADO.ogg\" \"jiwp-fumado.ogg\")",
+      "Bash(mv \"JIWP INFARTANDO CON SU VOZ .ogg\" \"jiwp-infartando-con-su-voz.ogg\")",
+      "Bash(mv \"JIWP ME ESTAS CAGANDO EL MICROFONO DE LA COMPU.ogg\" \"jiwp-me-estas-cagando.ogg\")",
+      "Bash(mv \"JIWP NIÑO MARAVILLA.ogg\" \"jiwp-nino-maravilla.ogg\")"
+    ],
+    "additionalDirectories": [
+      "/Users/marisuchang/Downloads"
+    ]
+  }
+}

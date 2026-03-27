@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaime Wong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #850e55;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.7);
+      --border: rgba(255,255,255,0.2);
+      --dark-text: #1e1e1e;
+      --pad: clamp(24px, 4vw, 57px);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #3c0834;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVIGATION ── */
+    .nav {
+      position: absolute;
+      top: 40px;
+      right: var(--pad);
+      display: flex;
+      gap: clamp(16px, 2vw, 32px);
+      font-size: clamp(16px, 1.5vw, 24px);
+      font-weight: 500;
+      z-index: 10;
+    }
+    .nav a {
+      color: var(--white);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav a:hover { opacity: 0.75; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 320px;
+      overflow: hidden;
+    }
+    .hero__bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero__copy {
+      position: absolute;
+      right: var(--pad);
+      bottom: 18%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      max-width: min(690px, 50%);
+    }
+    .hero__subtitle {
+      font-style: italic;
+      font-size: clamp(14px, 1.6vw, 24px);
+    }
+    .hero__title {
+      font-style: italic;
+      font-size: clamp(36px, 5.5vw, 84px);
+      text-align: right;
+      line-height: 1;
+    }
+    .hero__btn {
+      border: 1px solid var(--white);
+      color: var(--white);
+      background: transparent;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: clamp(14px, 1vw, 16px);
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      cursor: pointer;
+      letter-spacing: 1px;
+      min-width: 160px;
+      transition: background 0.2s;
+    }
+    .hero__btn:hover { background: rgba(255,255,255,0.12); }
+
+    .hero__fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(to bottom, transparent, #3c0834);
+      pointer-events: none;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      background: linear-gradient(to bottom, #3c0834 11%, #7a0c53 53%, #850e55 99%);
+      padding-bottom: 80px;
+    }
+
+    /* ── TABS ── */
+    .tabs-wrap {
+      padding: 40px var(--pad) 0;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(20px, 4vw, 56px);
+      font-size: clamp(14px, 1.5vw, 22px);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .tabs a {
+      color: var(--white);
+      text-decoration: none;
+      padding-bottom: 12px;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+      transition: opacity 0.2s;
+    }
+    .tabs a.active { border-bottom-color: var(--white); }
+    .tabs a:hover { opacity: 0.75; }
+
+    /* ── RECENT SECTION ── */
+    .recent {
+      padding: 32px var(--pad) 0;
+    }
+    .recent__title {
+      font-size: clamp(28px, 3.2vw, 48px);
+      font-weight: 500;
+      margin-bottom: 40px;
+    }
+
+    /* ── ALBUM CARD ── */
+    .album-card {
+      display: flex;
+      gap: clamp(16px, 2vw, 32px);
+      align-items: flex-start;
+      margin-bottom: 72px;
+    }
+    .album-cover {
+      width: clamp(100px, 16vw, 250px);
+      height: clamp(100px, 16vw, 250px);
+      object-fit: cover;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+    .album-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Album header row */
+    .album-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .album-header__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .album-meta { display: flex; flex-direction: column; gap: 4px; }
+    .album-artist { font-size: clamp(14px, 1.2vw, 18px); font-weight: 300; }
+    .album-name   { font-size: clamp(14px, 1.2vw, 18px); font-weight: 600; }
+    .album-time   { font-size: clamp(13px, 1.2vw, 18px); font-weight: 400; white-space: nowrap; }
+
+    /* Play buttons */
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .play-btn:hover { transform: scale(1.08); }
+    .play-btn--white { background: var(--white); }
+    .play-btn--pink  { background: var(--accent); }
+
+    .play-icon {
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 7px 0 7px 12px;
+      margin-left: 3px;
+    }
+    .play-icon--dark  { border-color: transparent transparent transparent #3c0834; }
+    .play-icon--white { border-color: transparent transparent transparent #ffffff; }
+
+    /* Songs list */
+    .songs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .song-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .song-row__left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .song-thumb {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .song-title {
+      font-size: clamp(13px, 1.1vw, 18px);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-number { font-weight: 300; margin-right: 4px; }
+    .song-row__right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .song-plays { font-size: clamp(13px, 1.1vw, 18px); font-weight: 500; }
+
+    /* Album footer */
+    .album-footer { display: flex; flex-direction: column; gap: 16px; }
+    .view-tracks  { font-size: clamp(14px, 1.2vw, 18px); font-weight: 600; cursor: pointer; }
+
+    .action-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .action-btn {
+      background: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      color: var(--dark-text);
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .action-btn:hover { background: #e8e8e8; }
+    .action-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 0;
+      padding: 48px var(--pad) 32px;
+      background: linear-gradient(to bottom, #850e55, #6a0b44);
+    }
+    .footer-cols {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(32px, 6vw, 120px);
+      margin-bottom: 48px;
+    }
+    .footer-col h4 {
+      font-size: clamp(14px, 1.2vw, 18px);
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 14px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .footer-col ul li a {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+    }
+    .footer-col ul li a:hover { text-decoration: underline; }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+    .footer-logo { width: 69px; height: 71px; object-fit: cover; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .hero__bg { content: url('hero-mobile.jpeg'); }
+      .hero__copy {
+        max-width: 80%;
+        bottom: 22%;
+        right: 50%;
+        transform: translateX(50%);
+        align-items: center;
+        text-align: center;
+      }
+      .hero__title { text-align: center; font-size: clamp(28px, 10vw, 48px); }
+      .hero__subtitle { font-size: clamp(12px, 3.5vw, 16px); }
+      .hero__btn { min-width: 120px; padding: 10px 20px; }
+      .album-card { flex-direction: column; }
+      .album-cover { width: 100%; height: auto; aspect-ratio: 1; }
+      .footer-cols { gap: 24px; }
+      .tabs { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVIGATION ── -->
+  <nav class="nav">
+    <a href="#music">Music</a>
+    <a href="#tour">Tour</a>
+    <a href="#fan-page">Fan Page</a>
+    <a href="#merch">Merch</a>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <!-- Replace src with your own hero image once Figma assets expire -->
+    <img class="hero__bg"
+         src="https://www.figma.com/api/mcp/asset/e3ea57de-9113-4abb-b6af-ea87faf4fcc2"
+         alt="Jaime Wong">
+    <div class="hero__copy">
+      <p class="hero__subtitle">Este 2 de Abril</p>
+      <p class="hero__title">COMING<br>SOON</p>
+      <button class="hero__btn">PRE-SAVE</button>
+    </div>
+    <div class="hero__fade"></div>
+  </section>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="main">
+
+    <!-- Tabs -->
+    <div class="tabs-wrap">
+      <nav class="tabs">
+        <a href="#" class="active">All</a>
+        <a href="#">Popular Tracks</a>
+        <a href="#">Tracks</a>
+        <a href="#">Albums</a>
+        <a href="#">Playlists</a>
+        <a href="#">Reposts</a>
+      </nav>
+    </div>
+
+    <!-- Recent -->
+    <section class="recent" id="music">
+      <h2 class="recent__title">Recent</h2>
+
+      <!-- ── ALBUM CARD 1 ── -->
+      <div class="album-card">
+        <img class="album-cover"
+             src="https://www.figma.com/api/mcp/asset/6a256265-7e70-4419-8608-1358be57234e"
+             alt="Sus 16 Grandes Éxitos">
+        <div class="album-body">
+          <div class="album-header">
+            <div class="album-header__left">
+              <button class="play-btn play-btn--white" aria-label="Play album">
+                <span class="play-icon play-icon--dark"></span>
+              </button>
+              <div class="album-meta">
+                <span class="album-artist">Jaime Wong</span>
+                <span class="album-name">Sus 16 Grandes Éxitos</span>
+              </div>
+            </div>
+            <span class="album-time">1 year ago</span>
+          </div>
+
+          <div class="songs-list">
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/6a256265-7e70-4419-8608-1358be57234e" alt="">
+                <span class="song-title"><span class="song-number">1.</span> La gata bajo la lluvia</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-bajo-la-lluvia.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">180 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/6a256265-7e70-4419-8608-1358be57234e" alt="">
+                <span class="song-title"><span class="song-number">2.</span> Sigue la lluvia</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-sigue-bajo-la-lluvia.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">150 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/6a256265-7e70-4419-8608-1358be57234e" alt="">
+                <span class="song-title"><span class="song-number">3.</span> Baladas innolvidables</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-me-estas-cagando.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">100 K</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="album-footer">
+            <span class="view-tracks">View 13 tracks</span>
+            <div class="action-btns">
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 13.5C8 13.5 1.5 9.5 1.5 5.5C1.5 3.567 3.067 2 5 2C6.2 2 7.267 2.633 8 3.6C8.733 2.633 9.8 2 11 2C12.933 2 14.5 3.567 14.5 5.5C14.5 9.5 8 13.5 8 13.5Z" fill="#1e1e1e"/></svg>
+                5,435
+              </button>
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M2 5h9M9 3l2 2-2 2M14 11H5M7 9l-2 2 2 2" stroke="#1e1e1e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                1,200
+              </button>
+              <button class="action-btn" aria-label="Share">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="12" cy="3.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="4" cy="8" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="12" cy="12.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M5.4 7.2l5.2-3M5.4 8.8l5.2 3" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Copy link">
+                <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M3 11V3.5C3 3.224 3.224 3 3.5 3H11" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Add to playlist">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALBUM CARD 2 ── -->
+      <div class="album-card">
+        <img class="album-cover"
+             src="https://www.figma.com/api/mcp/asset/b0964ea1-2ad3-4d92-b05b-6dd3c5c4f1ca"
+             alt="Jaime Wong Album 2">
+        <div class="album-body">
+          <div class="album-header">
+            <div class="album-header__left">
+              <button class="play-btn play-btn--white" aria-label="Play album">
+                <span class="play-icon play-icon--dark"></span>
+              </button>
+              <div class="album-meta">
+                <span class="album-artist">Jaime Wong</span>
+                <span class="album-name">El Niño Maravilla del Folklor</span>
+              </div>
+            </div>
+            <span class="album-time">3 year ago</span>
+          </div>
+
+          <div class="songs-list">
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/b0964ea1-2ad3-4d92-b05b-6dd3c5c4f1ca" alt="">
+                <span class="song-title"><span class="song-number">1.</span> Cerveza Cerveza</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-nino-maravilla.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">200 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/b0964ea1-2ad3-4d92-b05b-6dd3c5c4f1ca" alt="">
+                <span class="song-title"><span class="song-number">2.</span> Recordando mi tierra</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-fumado.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">170 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/b0964ea1-2ad3-4d92-b05b-6dd3c5c4f1ca" alt="">
+                <span class="song-title"><span class="song-number">3.</span> Las Raices</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-sus-raices-latinas-serranas.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">100 K</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="album-footer">
+            <span class="view-tracks">View 8 tracks</span>
+            <div class="action-btns">
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 13.5C8 13.5 1.5 9.5 1.5 5.5C1.5 3.567 3.067 2 5 2C6.2 2 7.267 2.633 8 3.6C8.733 2.633 9.8 2 11 2C12.933 2 14.5 3.567 14.5 5.5C14.5 9.5 8 13.5 8 13.5Z" fill="#1e1e1e"/></svg>
+                5,435
+              </button>
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M2 5h9M9 3l2 2-2 2M14 11H5M7 9l-2 2 2 2" stroke="#1e1e1e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                1,200
+              </button>
+              <button class="action-btn" aria-label="Share">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="12" cy="3.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="4" cy="8" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="12" cy="12.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M5.4 7.2l5.2-3M5.4 8.8l5.2 3" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Copy link">
+                <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M3 11V3.5C3 3.224 3.224 3 3.5 3H11" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Add to playlist">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALBUM CARD 3 ── -->
+      <div class="album-card">
+        <img class="album-cover"
+             src="https://www.figma.com/api/mcp/asset/176ddbd0-3bec-42b4-b322-7723d7227fcc"
+             alt="Jimmy's Fabulous Adventure">
+        <div class="album-body">
+          <div class="album-header">
+            <div class="album-header__left">
+              <button class="play-btn play-btn--white" aria-label="Play album">
+                <span class="play-icon play-icon--dark"></span>
+              </button>
+              <div class="album-meta">
+                <span class="album-artist">Jaime Wong</span>
+                <span class="album-name">Jimmy's Fabulous Adventure</span>
+              </div>
+            </div>
+            <span class="album-time">5 year ago</span>
+          </div>
+
+          <div class="songs-list">
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/176ddbd0-3bec-42b4-b322-7723d7227fcc" alt="">
+                <span class="song-title"><span class="song-number">1.</span> Round & Round</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-round-and-round.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">550 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/176ddbd0-3bec-42b4-b322-7723d7227fcc" alt="">
+                <span class="song-title"><span class="song-number">2.</span> Heart attack</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-infartando-con-su-voz.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">500 K</span>
+              </div>
+            </div>
+            <div class="song-row">
+              <div class="song-row__left">
+                <img class="song-thumb" src="https://www.figma.com/api/mcp/asset/176ddbd0-3bec-42b4-b322-7723d7227fcc" alt="">
+                <span class="song-title"><span class="song-number">3.</span> I am</span>
+              </div>
+              <div class="song-row__right">
+                <button class="play-btn play-btn--pink" aria-label="Play song" data-audio="audio/jiwp-perrota.ogg">
+                  <span class="play-icon play-icon--white"></span>
+                </button>
+                <span class="song-plays">100 K</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="album-footer">
+            <span class="view-tracks">View 12 tracks</span>
+            <div class="action-btns">
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 13.5C8 13.5 1.5 9.5 1.5 5.5C1.5 3.567 3.067 2 5 2C6.2 2 7.267 2.633 8 3.6C8.733 2.633 9.8 2 11 2C12.933 2 14.5 3.567 14.5 5.5C14.5 9.5 8 13.5 8 13.5Z" fill="#1e1e1e"/></svg>
+                5,435
+              </button>
+              <button class="action-btn">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M2 5h9M9 3l2 2-2 2M14 11H5M7 9l-2 2 2 2" stroke="#1e1e1e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                1,200
+              </button>
+              <button class="action-btn" aria-label="Share">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="12" cy="3.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="4" cy="8" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><circle cx="12" cy="12.5" r="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M5.4 7.2l5.2-3M5.4 8.8l5.2 3" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Copy link">
+                <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="#1e1e1e" stroke-width="1.3"/><path d="M3 11V3.5C3 3.224 3.224 3 3.5 3H11" stroke="#1e1e1e" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="action-btn" aria-label="Add to playlist">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /recent -->
+  </div><!-- /main -->
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#">Music</a></li>
+          <li><a href="#">Tour dates</a></li>
+          <li><a href="#">Fan Page</a></li>
+          <li><a href="#">Merch</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Fan Services</h4>
+        <ul>
+          <li><a href="#">Fan Mail</a></li>
+          <li><a href="#">Report a Sighting</a></li>
+          <li><a href="#">Request Autograph</a></li>
+          <li><a href="#">Birthday Shoutouts</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms &amp; Conditions</a></li>
+          <li><a href="#">Glitter Liability Waiver</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="#">Booking Inquiries</a></li>
+          <li><a href="#">Media Requests</a></li>
+          <li><a href="#">Fan Club Membership</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">
+        © 2025 Jaime Wong Entertainment LLC. All rights reserved. Especially the boa.<br>
+        Built with ❤️ by Marisu &amp; Nico
+      </p>
+      <img class="footer-logo"
+           src="https://www.figma.com/api/mcp/asset/798db95a-3099-44cb-a9be-d145744fea2c"
+           alt="Yape">
+    </div>
+  </footer>
+
+  <script>
+    let currentAudio = null;
+    let currentBtn = null;
+
+    document.querySelectorAll('.play-btn[data-audio]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const src = btn.dataset.audio;
+
+        // If same button, toggle pause/play
+        if (currentBtn === btn) {
+          if (currentAudio.paused) {
+            currentAudio.play();
+            setPlaying(btn, true);
+          } else {
+            currentAudio.pause();
+            setPlaying(btn, false);
+          }
+          return;
+        }
+
+        // Stop previous
+        if (currentAudio) {
+          currentAudio.pause();
+          setPlaying(currentBtn, false);
+        }
+
+        currentAudio = new Audio(src);
+        currentBtn = btn;
+        currentAudio.play();
+        setPlaying(btn, true);
+
+        currentAudio.addEventListener('ended', () => setPlaying(btn, false));
+      });
+    });
+
+    function setPlaying(btn, playing) {
+      const icon = btn.querySelector('.play-icon');
+      if (playing) {
+        icon.style.borderWidth = '0';
+        icon.style.width = '10px';
+        icon.style.height = '12px';
+        icon.style.background = btn.classList.contains('play-btn--white') ? '#3c0834' : '#ffffff';
+        icon.style.borderStyle = 'none';
+        icon.style.boxShadow = 'inset 3px 0 0 4px currentColor';
+      } else {
+        icon.style.cssText = '';
+      }
+    }
+  </script>
+</body>
+</html>
